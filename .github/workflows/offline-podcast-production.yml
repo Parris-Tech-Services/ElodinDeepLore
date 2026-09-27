@@ -1,0 +1,63 @@
+name: Elodin production offline podcasts
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'podcast-dialog.js'
+      - 'podcast-dialog.css'
+      - 'podcast-sw.js'
+      - 'tools/offline-podcast-production.mjs'
+      - '.github/workflows/offline-podcast-production.yml'
+permissions:
+  contents: read
+concurrency:
+  group: elodin-offline-podcasts
+  cancel-in-progress: true
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      titles: ${{ steps.matrix.outputs.titles }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: matrix
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),s=fs.readFileSync('index.html','utf8');
+          const m=s.match(/<script id="elodin-podcast-data" type="application\/json">([\s\S]*?)<\/script>/);
+          const rows=JSON.parse(m[1]).filter(e=>e.audio).map(e=>e.title);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,'titles='+JSON.stringify(rows)+'\n');
+          console.log('Direct-audio episodes:',rows.length);
+          NODE
+  production-offline:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        title: ${{ fromJSON(needs.prepare.outputs.titles) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: |
+          npm install --no-save --package-lock=false playwright@1.58.2
+          npx playwright@1.58.2 install --with-deps chromium
+          sudo apt-get install -y pulseaudio ffmpeg
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=offline_test
+          pactl set-default-sink offline_test
+      - run: node tools/offline-podcast-production.mjs
+        env:
+          EPISODE_TITLE: ${{ matrix.title }}
+          PRODUCTION_URL: https://parris-tech-services.github.io/ElodinDeepLore/
+          PULSE_SINK: offline_test
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: elodin-offline-evidence-${{ strategy.job-index }}
+          path: offline-evidence/
