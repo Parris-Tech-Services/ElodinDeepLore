@@ -174,3 +174,5 @@
 @media (prefers-reduced-motion: reduce) {
   #elodin-podcast-dialog { transition: none; }
 }
+
+.elodin-podcast-audio{display:block;width:100%;margin-top:12px}.elodin-podcast-offline{border:1px solid rgba(215,178,116,.45);border-radius:10px;background:#315c42;color:#fff;padding:9px 12px;font:700 13px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer}.elodin-podcast-offline:disabled{opacity:.65;cursor:wait}
