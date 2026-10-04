@@ -1,15 +1,6 @@
 name: Elodin production offline podcasts
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'index.html'
-      - 'podcast-dialog.js'
-      - 'podcast-dialog.css'
-      - 'podcast-sw.js'
-      - 'tools/offline-podcast-production.mjs'
-      - '.github/workflows/offline-podcast-production.yml'
 permissions:
   contents: read
 concurrency:
@@ -61,3 +52,4 @@ jobs:
         with:
           name: elodin-offline-evidence-${{ strategy.job-index }}
           path: offline-evidence/
+          retention-days: 1
