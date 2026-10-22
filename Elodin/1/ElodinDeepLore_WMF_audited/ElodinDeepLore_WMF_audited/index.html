@@ -1,6 +1,70 @@
 <!doctype html>
 <html lang="en">
   <head>
+<script data-parris-ga4="opt-in">
+/* GA4: explicit opt-in; no advertising, custom events or URL parameters. */
+(() => {
+  if (window.__parrisGA4Consent) return;
+  window.__parrisGA4Consent = true;
+  const id = 'G-LV0CW7PHH0';
+  const key = 'ga4-consent';
+  const blocked = navigator.globalPrivacyControl === true || navigator.doNotTrack === '1' || window.doNotTrack === '1';
+  window['ga-disable-' + id] = true;
+  if (blocked) return;
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+  const consent = value => ({analytics_storage:value, ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied'});
+  window.gtag('consent', 'default', consent('denied'));
+  let loaded = false;
+  let panel;
+  const safePage = () => ({page_location:location.origin + location.pathname, page_referrer:'', page_title:'ElodinDeepLore'});
+  function choose(choice) {
+    try { localStorage.setItem(key, choice); } catch { /* Choice still applies to this page. */ }
+    const allowed = choice === 'granted';
+    window['ga-disable-' + id] = !allowed;
+    window.gtag('consent', 'update', consent(allowed ? 'granted' : 'denied'));
+    if (panel) panel.hidden = true;
+    if (!allowed || loaded) return;
+    loaded = true;
+    window.gtag('set', {...safePage(), allow_google_signals:false, allow_ad_personalization_signals:false, url_passthrough:false});
+    window.gtag('js', new Date());
+    window.gtag('config', id, {...safePage(), cookie_expires:7776000, cookie_update:false, allow_google_signals:false, allow_ad_personalization_signals:false});
+    const script = document.createElement('script');
+    script.async = true;
+    script.referrerPolicy = 'no-referrer';
+    script.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+    document.head.appendChild(script);
+  }
+  function setup() {
+    panel = document.createElement('aside');
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-label', 'Analytics and privacy');
+    panel.style.cssText = 'position:fixed;bottom:48px;left:12px;right:12px;max-width:650px;padding:16px;background:#fff;color:#111;border:2px solid #555;border-radius:8px;z-index:2147483647;font:16px/1.5 system-ui;box-shadow:0 2px 12px #0006';
+    const text = document.createElement('p');
+    text.textContent = 'Allow Google Analytics to measure visits? Google receives page views and device/location estimates and uses first-party _ga cookies for up to 90 days. No advertising, names, form contents, search text or custom user IDs are sent. URL queries, fragments and referrers are omitted. Decline to keep analytics off; change your choice using Analytics settings. Global Privacy Control and Do Not Track keep Google Analytics off.';
+    panel.appendChild(text);
+    for (const [label, value] of [['Allow analytics', 'granted'], ['Decline', 'denied']]) {
+      const button = document.createElement('button');
+      button.type = 'button'; button.textContent = label;
+      button.style.cssText = 'margin:4px;padding:8px 12px;background:#eee;color:#111;border:1px solid #555;border-radius:4px;font:inherit;cursor:pointer';
+      button.addEventListener('click', () => choose(value));
+      panel.appendChild(button);
+    }
+    const settings = document.createElement('button');
+    settings.type = 'button'; settings.textContent = 'Analytics settings';
+    settings.style.cssText = 'position:fixed;bottom:8px;left:12px;z-index:2147483646;padding:6px 10px;background:#fff;color:#111;border:1px solid #555;border-radius:4px;font:14px system-ui;cursor:pointer';
+    settings.addEventListener('click', () => {panel.hidden = false; panel.querySelector('button').focus();});
+    document.body.appendChild(panel);
+    document.body.appendChild(settings);
+    let saved;
+    try { saved = localStorage.getItem(key); } catch { /* Ask again without storage. */ }
+    if (saved === 'granted' || saved === 'denied') choose(saved);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup, {once:true});
+  else setup();
+})();
+</script>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ElodinDeepLore</title>
